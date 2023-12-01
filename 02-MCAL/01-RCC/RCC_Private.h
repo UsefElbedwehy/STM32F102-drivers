@@ -1,41 +1,60 @@
-/***********************************************************************************/
-/************** 	Author : Usef Elbedwehy              		************************************/
-/**************	 	Layer : MACL 						             ***********************************/
-/**************	 	SWC : RCC    						            ***********************************/
-/************** 	Version : V1         						   		**********************************/
-/********************************************************************************/
 #ifndef   RCC_PRIVATE_H_
 #define   RCC_PRIVATE_H_
-/*clock sources*/
-#define PLL 	 	0
-#define HSE 	 	1
-#define HSI 	 	2
-#define HALF_HSI 	3
-#define HALF_HSE 	4
-/*states*/
-#define ON    		0
-#define OFF   		1
+
+#define TIMEOUT   4000
+
+/*@ClockSrc_t*/
+typedef enum{
+	PLL=0,
+	HSE,
+	HSI
+
+}ClockSrc_t;
+
+/*@HSEConfig_t*/
+typedef enum{
+	NORMAL_HSE=0,
+	HALF_HSE
+}HSEConfig_t;
+
+/*@PLLSrcConfig_t*/
+typedef enum{
+	HALF_HSI=0,
+	SRC_HSE
+}PLLSrcConfig_t;
+
+/*@State_t*/
+typedef enum{
+	ON=0,
+	OFF
+}State_t;
+
 /* PLL multiplication factor
  * ready to be masked
- * maskable*/
-#define PLL_M1  	0
-#define PLL_M2  	1
-#define PLL_M3  	2
-#define PLL_M4  	3
-#define PLL_M5  	4
-#define PLL_M6  	5
-#define PLL_M7  	6
-#define PLL_M8  	7
-#define PLL_M9  	8
-#define PLL_M10 	9
-#define PLL_M11 	10
-#define PLL_M12 	11
-#define PLL_M13 	12
-#define PLL_M14 	13
-#define PLL_M15 	14
-#define PLL_M16 	15
-/*AHB peripherals*/
-enum{
+ * maskable
+ * @PllMultiFac_t */
+typedef enum{
+	   PLL_M1=0,
+	   PLL_M2,
+	   PLL_M3,
+	   PLL_M4,
+	   PLL_M5,
+	   PLL_M6,
+	   PLL_M7,
+	   PLL_M8,
+	   PLL_M9,
+	   PLL_M10,
+	   PLL_M11,
+	   PLL_M12,
+	   PLL_M13,
+	   PLL_M14,
+	   PLL_M15,
+	   PLL_M16
+
+}PllMultiFac_t;
+
+/*@AHBPeriperals_t*/
+typedef enum{
 	DMA1,
 	DMA2,
 	SRAM,
@@ -43,9 +62,10 @@ enum{
 	CRC=6,
 	FSMC=8,
 	SDIO=10,
-};
-/*APB1 peripherals*/
-enum{
+}AHBPeriperals_t;
+
+/*@APB1Peripherals_t*/
+typedef enum{
 	TIM2,
 	TIM3,
 	TIM4,
@@ -68,9 +88,10 @@ enum{
 	BKP=27,
 	PWR,
 	DAC
-};
-/*APB2 peripherals*/
-enum{
+}APB1Peripherals_t;
+
+/*@APB2Peripherals_t*/
+typedef enum{
 	AFIO,
 	IOPA=2,
 	IOPB,
@@ -89,6 +110,6 @@ enum{
 	TIM9=19,
 	TIM10,
 	TIM11
-};
+}APB2Peripherals_t;
 
 #endif

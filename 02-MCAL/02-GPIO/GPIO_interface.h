@@ -78,11 +78,7 @@ typedef struct{
 	Mode_t			Mode;
 	InputConf_t	    InputConf;
 	OutputConf_t	OutputConf;
-	/*
-	PullUpDown_t	PullType;
 	
-	AltFunc_t 		AltFunc;
-	*/
 }PinConfig_t;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -53,12 +53,12 @@ typedef struct{
 	volatile uint32_t AFIO_MAPR2;
 }GPIO_Reg_t;
 /***************GPIO Register Definition ****************/
-#define GPIOA		((GPIO_Reg_t*))(GPIOA_BASE_ADDRESS))
-#define GPIOB		((GPIO_Reg_t*))(GPIOB_BASE_ADDRESS))
-#define GPIOC		((GPIO_Reg_t*))(GPIOC_BASE_ADDRESS))
-#define GPIOD		((GPIO_Reg_t*))(GPIOD_BASE_ADDRESS))
-#define GPIOE		((GPIO_Reg_t*))(GPIOE_BASE_ADDRESS))
-#define GPIOF		((GPIO_Reg_t*))(GPIOF_BASE_ADDRESS))
-#define GPIOG		((GPIO_Reg_t*))(GPIOG_BASE_ADDRESS))
+#define GPIOA		((GPIO_Reg_t*)GPIOA_BASE_ADDRESS)
+#define GPIOB		((GPIO_Reg_t*)GPIOB_BASE_ADDRESS)
+#define GPIOC		((GPIO_Reg_t*)GPIOC_BASE_ADDRESS)
+#define GPIOD		((GPIO_Reg_t*)GPIOD_BASE_ADDRESS)
+#define GPIOE		((GPIO_Reg_t*)GPIOE_BASE_ADDRESS)
+#define GPIOF		((GPIO_Reg_t*)GPIOF_BASE_ADDRESS)
+#define GPIOG		((GPIO_Reg_t*)GPIOG_BASE_ADDRESS)
 
 #endif

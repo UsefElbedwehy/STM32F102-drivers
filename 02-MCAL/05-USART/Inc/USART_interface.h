@@ -583,7 +583,7 @@ ErrorState_t USART_TransmitData(const USART_ConfigReg_t* Copy_InitConfig ,uint8_
  * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
  *			USART status
  * */
-ErrorState_t USART_ReceiveData(const USART_ConfigReg_t* Copy_InitConfig ,uint16_t* Copy_Data)
+ErrorState_t USART_ReceiveData(const USART_ConfigReg_t* Copy_InitConfig ,uint16_t* Copy_Data);
 
 /****** ### DMA ### ******/
 /*
@@ -616,7 +616,33 @@ ErrorState_t USART_ReceiveDataEnable_DMA(const USART_ConfigReg_t* Copy_InitConfi
  *			USART status
  * */
 ErrorState_t USART_SetCallBack( USART_PrephNumber USART_NUM ,USART_FlagID_t FLAG_ID,void (*Copy_pvCallBack)(void));
-
+/*
+ * @fn:		USART_IRQ_Handler
+ * @brief: Handle the IRQ interrupt
+ * @param:	USART_NUM		    (ENUM: @USART_PrephNumber)
+ * @retval:	void
+ * */
+void USART_IRQ_Handler( USART_PrephNumber USART_NUM);
+/*
+ * @fn:		USART_Transmit_IT
+ * @brief: transmit data with interrupt enabled
+ * @param:	Copy_InitConfig		  pointer to (STRUCT: @USART_ConfigReg_t)
+ * @param:	Copy_Data		  		uint8_t
+ * @param:	Copy_pvCallBack		  pointer to void function
+ * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
+ *			USART status
+ * */
+ErrorState_t USART_Transmit_IT(const USART_ConfigReg_t* Copy_InitConfig , uint8_t Copy_Data,void (*Copy_pvCallBack)(void));
+/*
+ * @fn:		USART_Receive_IT
+ * @brief: transmit data with interrupt enabled
+ * @param:	Copy_InitConfig		  pointer to (STRUCT: @USART_ConfigReg_t)
+ * @param:	Copy_Data		  		pointer to uint16_t
+ * @param:	Copy_pvCallBack		  pointer to void function
+ * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
+ *			USART status
+ * */
+ErrorState_t USART_Receive_IT(const USART_ConfigReg_t* Copy_InitConfig , uint16_t* Copy_Data,void (*Copy_pvCallBack)(void));
 
 
 

@@ -26,7 +26,7 @@
 /********************************************************************************
  ******************* ### GLOBAL VARIABLE SECTION ### ****************************
  ********************************************************************************/
-static USART_Reg_t* USARTx[NUMBER_OF_USART_PERIPH]={USART1, USART2, USART3, USART4 ,USART5};
+static USART_Reg_t* USARTx[NUMBER_OF_USART_PERIPH] = {USART1, USART2, USART3, USART4 ,USART5};
 
 static void (*G_pvCallBackFunc[NUMBER_OF_USART_PERIPH][FLAGS_NUMBER])(void) = {NULL};
 
@@ -81,7 +81,7 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 
 	ErrorState_t Local_ErrorState = OK;
 
-	if(USART_ConfigReg_t == NULL)
+	if(Copy_InitConfig == NULL)
 	{
 		/*Null Pointer*/
 		Local_ErrorState = NULL_POINTER;
@@ -240,7 +240,7 @@ ErrorState_t USART_ReceiveData(const USART_ConfigReg_t* Copy_InitConfig ,uint16_
 			USART_ReadIntFlag(Copy_InitConfig->USART_USARTNUMBER, READ_DATA_REG_NOT_EMPTY_FLAG_ID, &Local_u8FlagVal);
 		}
 		/*Receive data from DR*/
-		*Copy_Data = USARTx[opy_InitConfig->USART_USARTNUMBER]->USART_DR;
+		*Copy_Data = USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_DR;
 	}
 	else
 	{
@@ -319,7 +319,7 @@ ErrorState_t USART_SetCallBack( USART_PrephNumber USART_NUM ,USART_FlagID_t FLAG
 	if(Copy_pvCallBack != NULL)
 	{
 		/*Set the callback function*/
-		G_pvCallBackFunc = Copy_pvCallBack;
+		G_pvCallBackFunc[USART_NUM][FLAG_ID] = Copy_pvCallBack;
 	}
 	else
 	{
@@ -342,7 +342,7 @@ void USART_IRQ_Handler( USART_PrephNumber USART_NUM)
 	if(FlagVal == READY_FLAG)
 	{
 		/*read the received data*/
-		*G_pvCallBackFunc = USARTx[USART_NUM]->USART_DR;
+		*Global_u16ReceiveData[USART_NUM] = USARTx[USART_NUM]->USART_DR;
 
 		if(G_pvCallBackFunc[USART_NUM][READ_DATA_REG_NOT_EMPTY_FLAG_ID] != NULL)
 		{
@@ -356,7 +356,7 @@ void USART_IRQ_Handler( USART_PrephNumber USART_NUM)
 	if(FlagVal == READY_FLAG)
 	{
 		/*Clear transmit complete flag*/
-		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_SR &=~ (SET_MASK << SR_TC);
+		USARTx[USART_NUM]->USART_SR &=~ (SET_MASK << SR_TC);
 		if(G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID] != NULL)
 		{
 			G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID]();

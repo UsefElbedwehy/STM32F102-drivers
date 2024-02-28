@@ -79,6 +79,10 @@ ErrorState_t USART_ReadIntFlag(USART_PrephNumber Copy_USARTNumber ,USART_FlagID_
 ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 {
 
+	float USART_DIV = 0;
+
+	uint32_t DIV_Fraction = 0;
+
 	ErrorState_t Local_ErrorState = OK;
 
 	if(Copy_InitConfig == NULL)
@@ -104,6 +108,8 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 			&& ( Copy_InitConfig->USART_SYNCHMODE <= CLOCK_ENABLE )
 			&& ( Copy_InitConfig->USART_SYNCHMODE >= CLOCK_DISABLE ) )
 	{
+		/*USART enable */
+		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1 |= (SET_MASK << CR1_UE);
 		/*Make sure the register is at reset value*/
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1  &=~  CR1_REG_MASK;
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR2  &=~  CR2_REG_MASK;
@@ -120,7 +126,16 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR2 |= ((Copy_InitConfig->USART_STOPBITS) << CR2_STOP0);
 
 		/*BAUDRATE*/
-
+		USART_DIV = 8000000 / (float)(16U * Copy_InitConfig->USART_BAUDRATE);
+		USART_DIV *= 1000UL;
+		/* Set the Mantissa Part */
+		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_BRR |= (((uint32_t)USART_DIV / 1000UL) << BRR_DIV_MANTISSA);
+		/* Calculte the Fraction */
+		DIV_Fraction = (uint32_t)USART_DIV % 1000UL;
+		DIV_Fraction = DIV_Fraction * 16;
+		/* get Round */
+		DIV_Fraction += 500UL;
+		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_BRR |= ((uint32_t)(DIV_Fraction / 1000UL) << BRR_DIV_FRACTION);
 		/*Mode*/
 		switch(Copy_InitConfig->USART_MODE)
 		{
@@ -193,15 +208,15 @@ ErrorState_t USART_TransmitData(const USART_ConfigReg_t* Copy_InitConfig ,uint8_
 		{
 			USART_ReadIntFlag(Copy_InitConfig->USART_USARTNUMBER, TRANSMIT_DATA_REG_EMPTY_FLAG_ID, &Local_FlagVal);
 		}
-		Local_FlagVal=0;
+
 
 		/*Send data to DR*/
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_DR = Copy_Data;
 
-
+		Local_FlagVal=0;
 		USART_ReadIntFlag(Copy_InitConfig->USART_USARTNUMBER, TRANSMISSION_COMPLETE_FLAG_ID, &Local_FlagVal);
 		/*Wait for transfer complete flag is set*/
-		while(Local_FlagVal == NOT_READY_FLAG)
+		while(Local_FlagVal != READY_FLAG)
 		{
 			USART_ReadIntFlag(Copy_InitConfig->USART_USARTNUMBER, TRANSMISSION_COMPLETE_FLAG_ID, &Local_FlagVal);
 		}

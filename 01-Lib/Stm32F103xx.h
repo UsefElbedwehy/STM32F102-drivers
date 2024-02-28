@@ -39,7 +39,7 @@ typedef struct{
 	volatile uint32_t RCC_CFGR2;
 }RCC_Reg_t;
 /***************RCC Register Definition ****************/
-RCC_Reg_t* RCC = (RCC_Reg_t*)(RCC_BASE_ADDRESS);
+#define RCC  ((RCC_Reg_t*)RCC_BASE_ADDRESS)
 
 /***************GPIO Register Definition Structure****************/
 typedef struct{

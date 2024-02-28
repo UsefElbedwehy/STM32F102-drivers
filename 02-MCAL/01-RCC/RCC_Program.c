@@ -1,196 +1,250 @@
 #include <stdint.h>
-#include "RCC_Interface.h"
+
+#include "Stm32F103xx.h"
+#include "ErrType.h"
 #include "RCC_Private.h"
+#include "RCC_Interface.h"
 
 
-
-/* choose the clock source and its state
- * Copy_uint16ClkType: 1-PLL 2-HSE 3-HSI
- * Copy_uint16Status: 1-ON 2-OFF
+/*
+ * @fn:		RCC_SetClkSts
+ * @brief:	Set clock status (ON , OFF)
+ * @param:	Copy_ClockType		(enum: @ClockSrc_t)
+ * @param:	Copy_Status			(enum: @RCC_State_t)
+ * @retval:	Local_ErrorState	(enum: @ErrorState_t)
  * */
-uint16_t RCC_VoidSetClkSts(ClockSrc_t Copy_uint16ClkType,State_t Copy_uint16Status)
+ErrorState_t RCC_SetClkSts(ClockSrc_t Copy_ClockType,RCC_State_t Copy_Status)
 {
+
+	ErrorState_t Local_ErrorState=OK;
 	uint16_t Local_TimeOut=0;
-	uint16_t Local_ErrorState=0;
-	if(Copy_uint16ClkType==PLL)
-	{
-		switch(Copy_uint16Status)
-		{
-		case ON :
-			/*PLL ON*/
-			RCC->RCC_CR |= (1<<24);
 
-			/*Waiting the PLL ready flag*/
-			while((((RCC->RCC_CR>>25)&0x01)!=1) && (Local_TimeOut<TIMEOUT))
-			{
-				/*counter(Time Out)*/
-				Local_TimeOut++;
-			};
-			break;
-		case OFF:
-			/*PLL OFF*/
-			RCC->RCC_CR&=~(1<<24);
-			break;
-		default : Local_ErrorState=1;
+	/***Clock type***/
+	if(Copy_ClockType == CLK_SRC_PLL)
+	{
+		/***Clock type is PLL***/
+		switch(Copy_Status)
+		{
+		/*PLL ON*/
+		case RCC_ON :	RCC->RCC_CR |= ( SET_MASK << CR_PLLON );
+		/*Waiting the PLL ready flag*/
+		while( ( ( ( RCC->RCC_CR >> CR_PLLRDY ) & GET_MASK ) != PLL_READY_FLAG ) && ( Local_TimeOut <= TIMEOUT ) )
+		{
+			/*counter(Time Out)*/
+			Local_TimeOut++;
+		}
 		break;
+		/*PLL OFF*/
+		case RCC_OFF:	RCC->RCC_CR &=~ ( SET_MASK << CR_PLLON );	break;
+
+		default : Local_ErrorState = NOK;							break;
 		}
 	}
-	else if(Copy_uint16ClkType==HSE)
+	else if(Copy_ClockType == CLK_SRC_HSE)
 	{
-		switch(Copy_uint16Status)
+		/***Clock type is HSE***/
+		switch(Copy_Status)
 		{
-		case ON :
-			/*HSE ON*/
-			RCC->RCC_CR |= (1<<16);
-			/*Waiting the HSE ready flag*/
-			while((((RCC->RCC_CR>>17)&0x01)!=1) && (Local_TimeOut<TIMEOUT))
-			{
-				/*counter(Time Out)*/
-				Local_TimeOut++;
-			};
-			break;
-		case OFF:
-			/*HSE OFF*/
-			RCC->RCC_CR&=~(1<<16);
-			break;
-		default : Local_ErrorState=1;
+		/*HSE ON*/
+		case RCC_ON :		RCC->RCC_CR |= ( SET_MASK << CR_HSEON );
+		/*Waiting the HSE ready flag*/
+		while( ( ( ( RCC->RCC_CR >> CR_HSERDY ) & GET_MASK ) != HSE_READY_FLAG ) && ( Local_TimeOut <= TIMEOUT ) )
+		{
+			/*counter(Time Out)*/
+			Local_TimeOut++;
+		}
 		break;
+		/*HSE OFF*/
+		case RCC_OFF:	RCC->RCC_CR &=~ ( SET_MASK << CR_HSEON );	break;
+
+		default : Local_ErrorState = NOK;							break;
 		}
 	}
-	else if(Copy_uint16ClkType==HSI)
+	else if(Copy_ClockType == CLK_SRC_HSI)
 	{
-		switch(Copy_uint16Status)
+		/***Clock type is HSI***/
+		switch(Copy_Status)
 		{
-		case ON :
-			/*HSI ON*/
-			RCC->RCC_CR |= (1<<0);
-			/*Waiting the HSI ready flag*/
-			while((((RCC->RCC_CR>>1)&0x01)!=1) && (Local_TimeOut<TIMEOUT))
-			{
-				/*counter(Time Out)*/
-				Local_TimeOut++;
-			};
-			break;
-		case OFF:
-			/*HSI OFF*/
-			RCC->RCC_CR&=~(1<<0);
-			break;
-		default : Local_ErrorState=1;
-		break;
+		/*HSI ON*/
+		case RCC_ON :		RCC->RCC_CR |= ( SET_MASK << CR_HSION );
+		/*Waiting the HSI ready flag*/
+		while( ( ( ( RCC->RCC_CR >> CR_HSIRDY ) & GET_MASK ) != HSI_READY_FLAG ) && ( Local_TimeOut <= TIMEOUT ) )
+		{
+			/*counter(Time Out)*/
+			Local_TimeOut++;
 		}
-	}else{
-		Local_ErrorState=1;
+		break;
+		/*HSI OFF*/
+		case RCC_OFF:	RCC->RCC_CR &=~ ( SET_MASK << CR_HSION );	break;
+
+		default : Local_ErrorState = NOK;							break;
+		}
+	}
+	else
+	{
+		Local_ErrorState = NOK;
 	}
 	return Local_ErrorState;
 
 }
-/* choose the system clock source
- * Copy_uint16ClkType: 1-PLL 2-HSE 3-HSI
+
+/*
+ * @fn:		RCC_SetSysClk
+ * @brief:	Set system clock (PLL, HSE, HSI)
+ * @param:	Copy_ClockType		(enum: @ClockSrc_t)
+ * @retval:	Local_ErrorState	(enum: @ErrorState_t)
  * */
-uint16_t RCC_VoidSetSysClk(ClockSrc_t Copy_uint16ClkType)
+ErrorState_t RCC_SetSysClk(ClockSrc_t Copy_ClockType)
 {
-	uint16_t Local_ErrorState=0;
-	switch(Copy_uint16ClkType)
+	ErrorState_t Local_ErrorState = OK;
+	switch(Copy_ClockType)
 	{
-	case PLL: /*10*/
-		RCC->RCC_CFGR |= (1<<1);
-		RCC->RCC_CFGR &=~ (1<<0);
+	/* PLL selected as system clock*/
+	case CLK_SRC_PLL:
+
+		RCC->RCC_CFGR |=  ( SET_MASK << CFGR_SW1 );
+		RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_SW0 );
+
 		break;
-	case HSE: /*01*/
-		RCC->RCC_CFGR &=~ (1<<1);
-		RCC->RCC_CFGR |= (1<<0);
+		/* HSE selected as system clock*/
+	case CLK_SRC_HSE:
+
+		RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_SW1 );
+		RCC->RCC_CFGR |=  ( SET_MASK << CFGR_SW0 );
+
 		break;
-	case HSI: /*00*/
-		RCC->RCC_CFGR&=~(1<<1);
-		RCC->RCC_CFGR&=~(1<<0);
+		/*HSI selected as system clock*/
+	case CLK_SRC_HSI:
+
+		RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_SW1 );
+		RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_SW0 );
+
 		break;
-	default: Local_ErrorState=1;
-	break;
+
+	default: Local_ErrorState = NOK;	break;
 	}
 
 	return Local_ErrorState;
 }
-/*Copy_uint16Config : 1-HSE
- *                    2-HALF_HSE    */
-uint16_t RCC_VoidHSEConfig(HSEConfig_t Copy_uint16Config)
+
+/*
+ * @fn:		RCC_HSEConfig
+ * @brief:	Set HSE clock configurations
+ * @param:	Copy_HSEConfig		(enum: @HSEConfig_t)
+ * @retval:	Local_ErrorState	(enum: @ErrorState_t)
+ * */
+ErrorState_t RCC_HSEConfig(HSEConfig_t Copy_HSEConfig)
 {
-	uint16_t Local_ErrorState=0;
-	switch(Copy_uint16Config)
+	ErrorState_t Local_ErrorState = OK;
+	if( (Copy_HSEConfig <= HALF_HSE) && (Copy_HSEConfig >= NORMAL_HSE) )
 	{
-	case NORMAL_HSE:	/*HSE clock not divided*/
-		RCC->RCC_CFGR|=(1<<17);
-		break;
-	case HALF_HSE:/*HSE clock divided by 2*/
-		RCC->RCC_CFGR|=(1<<17);
-		break;
-	default:Local_ErrorState=1;
-	break;
+		switch(Copy_HSEConfig)
+		{
+		/*HSE clock not divided*/
+		case NORMAL_HSE:	RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_PLLXTPRE );	break;
+		/*HSE clock divided by 2*/
+		case HALF_HSE:		RCC->RCC_CFGR |=  ( SET_MASK << CFGR_PLLXTPRE );	break;
+
+		default:Local_ErrorState = NOK;						break;
+		}
 	}
+	else
+	{
+		Local_ErrorState = NOK;
+	}
+
 	return Local_ErrorState;
 }
-/**Copy_uint16PLLMux options:
- * PLL_M1 - PLL_M2 - PLL_M3 - PLL_M4 - PLL_M5 - PLL_M6 - PLL_M7 - PLL_M8
- * PLL_M9 - PLL_M10 - PLL_M11 - PLL_M12 - PLL_M13 - PLL_M14 - PLL_M15 - PLL_M16
- **Copy_uint16PLLSrc options: 1-HSI/2
-                              2-HSE   * * */
 
-uint16_t RCC_VoidPLLConfig(PllMultiFac_t Copy_uint16PLLMux,PLLSrcConfig_t Copy_uint16PLLSrc)
+/*
+ * @fn:		RCC_PLLConfig
+ * @brief:	Set PLL clock configurations
+ * @param:	Copy_PLLMux			(enum: @PllMultiFac_t)
+ * @param:	Copy_PLLSrc			(enum: @PLLSrcConfig_t)
+ * @retval:	Local_ErrorState	(enum: @ErrorState_t)
+ * */
+ErrorState_t RCC_PLLConfig(PllMultiFac_t Copy_PLLMux,PLLSrcConfig_t Copy_PLLSrc)
 {
-	uint16_t Local_ErrorState=0;
+	ErrorState_t Local_ErrorState = NOK;
 	/*PLL source*/
-	switch(Copy_uint16PLLSrc)
+	switch(Copy_PLLSrc)
 	{
-	case SRC_HSE:	/*HSE oscillator clock selected as PLL input clock*/
-		RCC->RCC_CFGR|=(1<<17);
-		break;
-	case HALF_HSI:	/*HSI oscillator clock / 2 selected as PLL input clock*/
-		RCC->RCC_CFGR&=~(1<<16);
-		break;
-	default: Local_ErrorState=1;
-	break;
+	/*HSE oscillator clock selected as PLL input clock*/
+	case PLL_SRC_HSE:		RCC->RCC_CFGR |=  ( SET_MASK << CFGR_PLLSRC );		break;
+	/*HSI oscillator clock / 2 selected as PLL input clock*/
+	case PLL_SRC_HALF_HSI:	RCC->RCC_CFGR &=~ ( SET_MASK << CFGR_PLLSRC );		break;
+
+	default: Local_ErrorState = NOK;							break;
 	}
+
 	/*PLL multiplication factor*/
-	RCC->RCC_CFGR |=(Copy_uint16PLLMux<<18);
+	RCC->RCC_CFGR |= ( Copy_PLLMux << CFGR_PLLMUL0);
 
 	return Local_ErrorState;
 }
-/*Copy_uint16Peripheral option:
- * DMA1,	DMA2,	SRAM,	FLITF,
-	CRC,	FSMC,	SDIO,*/
-void RCC_AHBEnableClock(AHBPeriperals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_AHBEnableClock
+ * @brief:	Enable AHB clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @AHBPeriperals_t)
+ * @retval:	void
+ * */
+void RCC_AHBEnableClock(AHBPeriperals_t Copy_Peripheral )
 {
-	RCC->RCC_APB1ENR|=(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB1ENR |= ( SET_MASK << Copy_Peripheral );
 }
-void RCC_AHBDisableClock(AHBPeriperals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_AHBDisableClock
+ * @brief:	Disable AHB clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @AHBPeriperals_t)
+ * @retval:	void
+ * */
+void RCC_AHBDisableClock(AHBPeriperals_t Copy_Peripheral )
 {
-	RCC->RCC_APB1ENR&=~(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB1ENR &=~ ( SET_MASK << Copy_Peripheral );
 }
-/*Copy_uint16Peripheral option:
- *  TIM2,     TIM3,	    TIM4,	  TIM5,
- *  TIM6,	  TIM7, 	TIM12,	  TIM13,
-	TIM14,	  WWDG,	    SPI2,     SPI3,
-	USART2,	  USART3,	UART4,	  UART5,
-	I2C1,	  I2C2,	    USB,	  BKP,
-	PWR,	  DAC 		* * * * * * * * */
-void RCC_APB1EnableClock(APB1Peripherals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_APB1EnableClock
+ * @brief:	Enable APB1 clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @APB1Peripherals_t)
+ * @retval:	void
+ * */
+void RCC_APB1EnableClock(APB1Peripherals_t Copy_Peripheral)
 {
-	RCC->RCC_APB1ENR|=(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB1ENR |= ( SET_MASK << Copy_Peripheral );
 }
-void RCC_APB1DisableClock(APB1Peripherals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_APB1DisableClock
+ * @brief:	Disable APB1 clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @APB1Peripherals_t)
+ * @retval:	void
+ * */
+void RCC_APB1DisableClock(APB1Peripherals_t Copy_Peripheral)
 {
-	RCC->RCC_APB1ENR&=~(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB1ENR &=~ ( SET_MASK << Copy_Peripheral );
 }
-/*Copy_uint16Peripheral option:
- * AFIO,	IOPA,	IOPB,	IOPC,
-	IOPD,	IOPE,	IOPF,	IOPG,
-	ADC1,	ADC2,	TIM1,	SPI1,
-	TIM8,	USART,	ADC3,	TIM9,
-	TIM10,	TIM11*/
-void RCC_APB2EnableClock(APB2Peripherals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_APB2EnableClock
+ * @brief:	Enable APB2 clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @APB2Peripherals_t)
+ * @retval:	void
+ * */
+void RCC_APB2EnableClock(APB2Peripherals_t Copy_Peripheral)
 {
-	RCC->RCC_APB2ENR|=(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB2ENR |= ( SET_MASK << Copy_Peripheral );
 }
-void RCC_APB2DisableClock(APB2Peripherals_t Copy_uint16Peripheral)
+
+/*
+ * @fn:		RCC_APB2DisableClock
+ * @brief:	Disable APB2 clock for peripheral
+ * @param:	Copy_Peripheral		(ENUM: @APB2Peripherals_t)
+ * @retval:	void
+ * */
+void RCC_APB2DisableClock(APB2Peripherals_t Copy_Peripheral)
 {
-	RCC->RCC_APB2ENR&=~(1<<Copy_uint16Peripheral);
+	RCC->RCC_APB2ENR &=~ ( SET_MASK << Copy_Peripheral );
 }

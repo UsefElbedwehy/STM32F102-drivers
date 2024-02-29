@@ -13,6 +13,9 @@
 #define	USART4_BASE_ADDRESS			0x40004C00UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 4*/
 #define	USART3_BASE_ADDRESS			0x40004800UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 3*/
 #define	USART2_BASE_ADDRESS			0x40004400UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 2*/
+
+#define SPI3_BASE_ADDRESS			0x40003C00UL				/*Serial Peripheral Interface 3*/
+#define SPI2_BASE_ADDRESS			0x40003800UL				/*Serial Peripheral Interface 2*/
 /***************APB2 Peripherals Base Addresses****************/
 #define GPIOA_BASE_ADDRESS         0x40010800UL				 /*GENERAL PURPOSE INPUT OUTPOT (PORTA) BASE ADDRESS*/
 #define GPIOB_BASE_ADDRESS			0x40010C00UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTB) BASE ADDRESS*/
@@ -23,6 +26,8 @@
 #define GPIOG_BASE_ADDRESS			0x40012000UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTG) BASE ADDRESS*/
 
 #define	USART1_BASE_ADDRESS			0x40013800UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 1*/
+
+#define SPI1_BASE_ADDRESS			0x40013000UL				/*Serial Peripheral Interface 1*/
 /***************RCC Register Definition Structure****************/
 typedef struct{
 	volatile uint32_t RCC_CR;
@@ -96,5 +101,23 @@ typedef struct{
 #define	USART4	((USART_Reg_t*)USART4_BASE_ADDRESS)
 #define	USART5	((USART_Reg_t*)USART5_BASE_ADDRESS)
 
+/***************SPI Register Definition Structure****************/
+typedef struct{
+
+	volatile uint32_t SPI_CR1;
+	volatile uint32_t SPI_CR2;
+	volatile uint32_t SPI_SR;
+	volatile uint32_t SPI_DR;
+	volatile uint32_t SPI_CRCPR;
+	volatile uint32_t SPI_RXCRCR;
+	volatile uint32_t SPI_TXCRCR;
+	volatile uint32_t SPI_I2SCFGR;
+	volatile uint32_t SPI_I2SPR;
+
+}SPI_Reg_t;
+/***************SPI Register Definition ****************/
+#define SPI1		((SPI_Reg_t*)SPI1_BASE_ADDRESS)
+#define SPI2		((SPI_Reg_t*)SPI2_BASE_ADDRESS)
+#define SPI3		((SPI_Reg_t*)SPI3_BASE_ADDRESS)
 
 #endif

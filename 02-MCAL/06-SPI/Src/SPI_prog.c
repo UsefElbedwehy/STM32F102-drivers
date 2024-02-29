@@ -184,13 +184,13 @@ ErrorState_t SPI_GetFlag(SPI_Num_t SPI_Number ,SPI_FlagID_t FlagID,uint8_t* Flag
 }
 
 /*
- * @fn:		SPI_Enable_DMA
- * @brief: function to enable the DMA line
+ * @fn:		SPI_EnableTransmit_DMA
+ * @brief: function to enable the DMA transmit line
  * @param: SPI_Number 				(ENUM: @SPI_Num_t)
  * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t SPI_Enable_DMA(SPI_Num_t SPI_Number)
+ErrorState_t SPI_EnableTransmit_DMA(SPI_Num_t SPI_Number)
 {
 	ErrorState_t Local_ErrorState = OK;
 
@@ -198,6 +198,29 @@ ErrorState_t SPI_Enable_DMA(SPI_Num_t SPI_Number)
 	{
 		/*Enable DMA transmitter line*/
 		SPIx[SPI_Number]->SPI_CR2 |= (SET_MASK << CR2_TXDMAEN);
+	}
+	else
+	{
+		Local_ErrorState = NOK;
+	}
+
+	return Local_ErrorState;
+}
+
+
+/*
+ * @fn:		SPI_EnableReceive_DMA
+ * @brief: function to enable the DMA receive line
+ * @param: SPI_Number 				(ENUM: @SPI_Num_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_EnableReceive_DMA(SPI_Num_t SPI_Number)
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	if((SPI_Number >= SPI_NUM1) && (SPI_Number <= SPI_NUM3))
+	{
 		/*Enable DMA receiver line*/
 		SPIx[SPI_Number]->SPI_CR2 |= (SET_MASK << CR2_RXDMAEN);
 	}
@@ -210,13 +233,13 @@ ErrorState_t SPI_Enable_DMA(SPI_Num_t SPI_Number)
 }
 
 /*
- * @fn:		SPI_Disable_DMA
- * @brief: function to Disable the DMA line
+ * @fn:		SPI_DisableTransmit_DMA
+ * @brief: function to Disable the DMA Transmit line
  * @param: SPI_Number 				(ENUM: @SPI_Num_t)
  * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t SPI_Disable_DMA(SPI_Num_t SPI_Number)
+ErrorState_t SPI_DisableTransmit_DMA(SPI_Num_t SPI_Number)
 {
 	ErrorState_t Local_ErrorState = OK;
 
@@ -236,8 +259,99 @@ ErrorState_t SPI_Disable_DMA(SPI_Num_t SPI_Number)
 }
 
 /*
+ * @fn:		SPI_DisableReceive_DMA
+ * @brief: function to Disable the DMA Receive line
+ * @param: SPI_Number 				(ENUM: @SPI_Num_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_DisableReceive_DMA(SPI_Num_t SPI_Number)
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	if((SPI_Number >= SPI_NUM1) && (SPI_Number <= SPI_NUM3))
+	{
+		/*Disable DMA transmitter line*/
+		SPIx[SPI_Number]->SPI_CR2 &=~ (SET_MASK << CR2_TXDMAEN);
+		/*Disable DMA receiver line*/
+		SPIx[SPI_Number]->SPI_CR2 &=~ (SET_MASK << CR2_RXDMAEN);
+	}
+	else
+	{
+		Local_ErrorState = NOK;
+	}
+
+	return Local_ErrorState;
+}
+
+/*
+ * @fn: SPI_Receive
+ * @brief: receive data
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: ReceivedData			pointer to (uint16_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Receive(const SPI_Config_t* Init ,uint16_t* ReceivedData)
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	uint8_t		Local_FlagStatus = NOT_READY_FLAG;
+
+	if(ReceivedData == NULL)
+	{
+		Local_ErrorState = NULL_POINTER;
+	}
+	else
+	{
+		SPI_GetFlag(Init->SPI_NUM, SPI_RxBUFFER_NOT_EMPTY_FLAG_ID, &Local_FlagStatus);
+		/*wait until Receive buffer not empty*/
+		while(Local_FlagStatus != READY_FLAG)
+		{
+			SPI_GetFlag(Init->SPI_NUM, SPI_RxBUFFER_NOT_EMPTY_FLAG_ID, &Local_FlagStatus);
+		}
+		/*receive Data*/
+		*ReceivedData = SPIx[Init->SPI_NUM]->SPI_DR;
+
+	}
+	return Local_ErrorState;
+}
+
+/*
+ * @fn: SPI_Transmit
+ * @brief: transmit data
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: TrasmitData			uint16_t
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Transmit(const SPI_Config_t* Init ,uint16_t TrasmitData )
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	uint8_t		Local_FlagStatus = NOT_READY_FLAG;
+
+	if(ReceivedData == NULL)
+	{
+		Local_ErrorState = NULL_POINTER;
+	}
+	else
+	{
+		SPI_GetFlag(Init->SPI_NUM, SPI_TxBUFFER_EMPTY_FLAG_ID, &Local_FlagStatus);
+		/*wait until Transmit buffer empty*/
+		while(Local_FlagStatus != READY_FLAG)
+		{
+			SPI_GetFlag(Init->SPI_NUM, SPI_TxBUFFER_EMPTY_FLAG_ID, &Local_FlagStatus);
+		}
+		/*transmit Data*/
+		SPIx[Init->SPI_NUM]->SPI_DR = TrasmitData;
+	}
+	return Local_ErrorState;
+}
+
+/*
  * @fn: SPI_Transceive
- * @brief:
+ * @brief: transmit and receive data
  * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
  * @param: TrasmitData			uint16_t
  * @param: ReceivedData			pointer to (uint16_t)
@@ -339,9 +453,91 @@ ErrorState_t SPI_Enable_IT(const SPI_Config_t* Init)
 	return Local_ErrorState;
 }
 
+
+/*
+ *@fn:	SPI_Receive_IT
+ *@brief: to receive data with interrupt
+ * @param: TrasmitData			pointer to uint16_t
+ * @param: ReceivedData			pointer to (uint16_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Receive_IT(const SPI_Config_t* Init ,uint16_t* ReceivedData)
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	if((Init == NULL))
+	{
+		Local_ErrorState = NULL_POINTER;
+	}
+	else
+	{
+
+		if(ReceivedData != NULL)
+		{
+
+			/*Set the receive variable Globally*/
+			G_ReceivedData[Init->SPI_NUM] = ReceivedData;
+			/*set call function of Rx Globally*/
+			G_pvCallBackFunc[Init->SPI_NUM][SPI_RxBUFFER_NOT_EMPTY_FLAG_ID] = Init->pvRxFunc;
+			/*Master Initiate the communication by sending data while slave start when received data*/
+			if(Init->SPI_MASTER_SLAVE_MODE == SPI_MASTER)
+			{
+				/*Send Garbage to initiate the communication*/
+				SPIx[Init->SPI_NUM]->SPI_DR = GARBAGE_DATA;
+				/*enable RX buffer not empty interrupt*/
+				SPIx[Init->SPI_NUM]->SPI_CR2 |= (SET_MASK << CR2_RXNEIE);
+			}
+			else if(Init->SPI_MASTER_SLAVE_MODE == SPI_SLAVE)
+			{
+				/*enable RX buffer not empty interrupt*/
+				SPIx[Init->SPI_NUM]->SPI_CR2 |= (SET_MASK << CR2_RXNEIE);
+			}
+		}
+
+	}
+
+	return Local_ErrorState;
+}
+
+/*
+ *@fn:	SPI_Transmit_IT
+ *@brief: to transmit data with interrupt
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: TrasmitData			pointer to uint16_t
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Transmit_IT(const SPI_Config_t* Init ,uint16_t TrasmitData )
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	if((Init == NULL))
+	{
+		Local_ErrorState = NULL_POINTER;
+	}
+	else
+	{
+			uint8_t L_FlagStatus = NOT_READY_FLAG;
+			/*wait till Transmit buffer empty*/
+			SPI_GetFlag(Init->SPI_NUM, SPI_TxBUFFER_EMPTY_FLAG_ID, &L_FlagStatus);
+			while(L_FlagStatus != READY_FLAG){
+				SPI_GetFlag(Init->SPI_NUM, SPI_TxBUFFER_EMPTY_FLAG_ID, &L_FlagStatus);
+			}
+			/*set call function of Tx*/
+			G_pvCallBackFunc[Init->SPI_NUM][SPI_TxBUFFER_EMPTY_FLAG_ID] = Init->pvTxFunc;
+			/*Send data*/
+			SPIx[Init->SPI_NUM]->SPI_DR = TrasmitData;
+			/*enable Tx buffer empty interrupt*/
+			SPIx[Init->SPI_NUM]->SPI_CR2 |= (SET_MASK << CR2_TXEIE);
+	}
+
+	return Local_ErrorState;
+}
+
 /*
  *@fn:	SPI_Transceive_IT
- *@brief:
+ *@brief: to transmit or receive data or both with interrupt
  * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
  * @param: TrasmitData			pointer to uint16_t
  * @param: ReceivedData			pointer to (uint16_t)

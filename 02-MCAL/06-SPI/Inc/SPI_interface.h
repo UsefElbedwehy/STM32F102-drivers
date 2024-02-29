@@ -319,22 +319,60 @@ ErrorState_t SPI_Init(const SPI_Config_t* Init);
 ErrorState_t SPI_GetFlag(SPI_Num_t SPI_Number ,SPI_FlagID_t FlagID,uint8_t* FlagStatus );
 
 /*
- * @fn:		SPI_Enable_DMA
- * @brief: function to enable the DMA line
+ * @fn:		SPI_EnableTransmit_DMA
+ * @brief: function to enable the DMA transmit line
  * @param: SPI_Number 				(ENUM: @SPI_Num_t)
  * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t SPI_Enable_DMA(SPI_Num_t SPI_Number);
+ErrorState_t SPI_EnableTransmit_DMA(SPI_Num_t SPI_Number);
 
 /*
- * @fn:		SPI_Disable_DMA
- * @brief: function to Disable the DMA line
+ * @fn:		SPI_EnableReceive_DMA
+ * @brief: function to enable the DMA receive line
  * @param: SPI_Number 				(ENUM: @SPI_Num_t)
  * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t SPI_Disable_DMA(SPI_Num_t SPI_Number);
+ErrorState_t SPI_EnableReceive_DMA(SPI_Num_t SPI_Number);
+
+/*
+ * @fn:		SPI_DisableTransmit_DMA
+ * @brief: function to Disable the DMA Transmit line
+ * @param: SPI_Number 				(ENUM: @SPI_Num_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_DisableTransmit_DMA(SPI_Num_t SPI_Number);
+
+/*
+ * @fn:		SPI_DisableReceive_DMA
+ * @brief: function to Disable the DMA Receive line
+ * @param: SPI_Number 				(ENUM: @SPI_Num_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_DisableReceive_DMA(SPI_Num_t SPI_Number);
+
+/*
+ * @fn: SPI_Receive
+ * @brief: receive data
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: ReceivedData			pointer to (uint16_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Receive(const SPI_Config_t* Init ,uint16_t* ReceivedData);
+
+/*
+ * @fn: SPI_Transmit
+ * @brief: transmit data
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: TrasmitData			uint16_t
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Transmit(const SPI_Config_t* Init ,uint16_t TrasmitData );
 
 /*
  * @fn: SPI_Transceive
@@ -357,15 +395,24 @@ ErrorState_t SPI_Transceive(const SPI_Config_t* Init ,uint16_t TrasmitData ,uint
 ErrorState_t SPI_Enable_IT(const SPI_Config_t* Init);
 
 /*
- * @fn:		SPI_SetCallBack
- * @brief: function to set the callback function
- * @param: SPI_Number 				(ENUM: @SPI_Num_t)
- * @param: FlagID 				(ENUM: @SPI_FlagID_t)
- * @param: pvCallBack 				pointer to void function
+ *@fn:	SPI_Transmit_IT with interrupt
+ *@brief: to transmit data
+ * @param: Init 				pointer to (STRUCT: @SPI_Config_t)
+ * @param: TrasmitData			pointer to uint16_t
  * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t SPI_SetCallBack(SPI_Num_t SPI_Number ,SPI_FlagID_t FlagID,void (*pvCallBack)(void));
+ErrorState_t SPI_Transmit_IT(const SPI_Config_t* Init ,uint16_t TrasmitData );
+
+/*
+ *@fn:	SPI_Receive_IT
+ *@brief: to receive data with interrupt
+ * @param: TrasmitData			pointer to uint16_t
+ * @param: ReceivedData			pointer to (uint16_t)
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_Receive_IT(const SPI_Config_t* Init ,uint16_t* ReceivedData);
 
 /*
  *@fn:	SPI_Transceive_IT
@@ -377,6 +424,17 @@ ErrorState_t SPI_SetCallBack(SPI_Num_t SPI_Number ,SPI_FlagID_t FlagID,void (*pv
  *
  * */
 ErrorState_t SPI_Transceive_IT(const SPI_Config_t* Init ,uint16_t* TrasmitData ,uint16_t* ReceivedData);
+
+/*
+ * @fn:		SPI_SetCallBack
+ * @brief: function to set the callback function
+ * @param: SPI_Number 				(ENUM: @SPI_Num_t)
+ * @param: FlagID 				(ENUM: @SPI_FlagID_t)
+ * @param: pvCallBack 				pointer to void function
+ * @retval: Local_ErrorState	(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t SPI_SetCallBack(SPI_Num_t SPI_Number ,SPI_FlagID_t FlagID,void (*pvCallBack)(void));
 
 /*
  * @fn: SPI_IRQ_Handler

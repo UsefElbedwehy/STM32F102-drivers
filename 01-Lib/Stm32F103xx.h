@@ -16,8 +16,11 @@
 
 #define SPI3_BASE_ADDRESS			0x40003C00UL				/*Serial Peripheral Interface 3*/
 #define SPI2_BASE_ADDRESS			0x40003800UL				/*Serial Peripheral Interface 2*/
+
+#define I2C2_BASE_ADDRESS			0x40005800UL				/*Inter-Integrated Circuit 2*/
+#define I2C1_BASE_ADDRESS			0x40005400UL				/*Inter-Integrated Circuit 1*/
 /***************APB2 Peripherals Base Addresses****************/
-#define GPIOA_BASE_ADDRESS         0x40010800UL				 /*GENERAL PURPOSE INPUT OUTPOT (PORTA) BASE ADDRESS*/
+#define GPIOA_BASE_ADDRESS         0x40010800UL				   /*GENERAL PURPOSE INPUT OUTPOT (PORTA) BASE ADDRESS*/
 #define GPIOB_BASE_ADDRESS			0x40010C00UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTB) BASE ADDRESS*/
 #define GPIOC_BASE_ADDRESS			0x40011000UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTC) BASE ADDRESS*/
 #define GPIOD_BASE_ADDRESS			0x40011400UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTD) BASE ADDRESS*/
@@ -119,5 +122,24 @@ typedef struct{
 #define SPI1		((SPI_Reg_t*)SPI1_BASE_ADDRESS)
 #define SPI2		((SPI_Reg_t*)SPI2_BASE_ADDRESS)
 #define SPI3		((SPI_Reg_t*)SPI3_BASE_ADDRESS)
+
+/***************I2C Register Definition Structure****************/
+typedef struct{
+
+	volatile uint32_t I2C_CR1;
+	volatile uint32_t I2C_CR2;
+	volatile uint32_t I2C_OAR1;
+	volatile uint32_t I2C_OAR2;
+	volatile uint32_t I2C_DR;
+	volatile uint32_t I2C_SR1;
+	volatile uint32_t I2C_SR2;
+	volatile uint32_t I2C_CCR;
+	volatile uint32_t I2C_TRISE;
+
+}I2C_Reg_t;
+/***************I2C Register Definition ****************/
+#define I2C1	((I2C_Reg_t*)I2C1_BASE_ADDRESS)
+#define I2C2	((I2C_Reg_t*)I2C2_BASE_ADDRESS)
+
 
 #endif

@@ -9,8 +9,9 @@
 #include "Stm32F103xx.h"
 
 #include "ErrType.h"
-#include "GPIO_interface.h"
 #include "GPIO_prv.h"
+#include "GPIO_interface.h"
+
 
 /*
  * * * * * * * * * * * * * * * * *
@@ -18,12 +19,12 @@
  * * * * * * * * * * * * * * * * *
  */
 static GPIO_Reg_t* GPIOx[GPIO_PERIPHERAL_NUM]= {  	GPIOA,
-													GPIOB,
-													GPIOC,
-													GPIOD,
-													GPIOE,
-													GPIOF,
-													GPIOG
+		GPIOB,
+		GPIOC,
+		GPIOD,
+		GPIOE,
+		GPIOF,
+		GPIOG
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -36,9 +37,9 @@ static GPIO_Reg_t* GPIOx[GPIO_PERIPHERAL_NUM]= {  	GPIOA,
  *  PinConfig:	Port, PinNum, Mode,
  *              OutputConfig, InputConfig
  */
-uint8_t GPIO_u8PinInit(const PinConfig_t* Copy_PinConfig)
+ErrorState_t GPIO_u8PinInit(const PinConfig_t* Copy_PinConfig)
 {
-	uint8_t Local_u8ErrorState=OK;
+	ErrorState_t Local_ErrorState=OK;
 	/*Check weather the pointer points to Null or Not*/
 	if(Copy_PinConfig != NULL)
 	{
@@ -90,15 +91,15 @@ uint8_t GPIO_u8PinInit(const PinConfig_t* Copy_PinConfig)
 		}
 		else
 		{
-			Local_u8ErrorState=NOK;
+			Local_ErrorState=NOK;
 		}
 
 	}
 	else
 	{
-		Local_u8ErrorState=NULL_POINTER;
+		Local_ErrorState=NULL_POINTER;
 	}
-	return Local_u8ErrorState;
+	return Local_ErrorState;
 }
 
 /*
@@ -111,9 +112,10 @@ uint8_t GPIO_u8PinInit(const PinConfig_t* Copy_PinConfig)
  * @retval Local_u8ErrorState
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
-uint8_t GPIO_u8SetPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t PinVal)
+ErrorState_t GPIO_u8SetPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t PinVal)
 {
-	uint8_t Local_u8ErrorState=OK;
+	ErrorState_t Local_ErrorState=OK;
+
 	if((Port<=PORTG) && (PinNum<=PIN15))
 	{
 		if(PinVal == PIN_LOW)
@@ -126,15 +128,15 @@ uint8_t GPIO_u8SetPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t PinVal)
 		}
 		else
 		{
-			Local_u8ErrorState=NOK;
+			Local_ErrorState=NOK;
 		}
 	}
 	else
 	{
-		Local_u8ErrorState=NOK;
+		Local_ErrorState=NOK;
 	}
 
-	return Local_u8ErrorState;
+	return Local_ErrorState;
 }
 /*
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -146,9 +148,9 @@ uint8_t GPIO_u8SetPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t PinVal)
  * @retval Local_u8ErrorState
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
-uint8_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
+ErrorState_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
 {
-	uint8_t Local_u8ErrorState=OK;
+	ErrorState_t Local_ErrorState=OK;
 
 	if((Port<=PORTG) && (PinNum<=PIN15))
 	{
@@ -158,10 +160,10 @@ uint8_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
 	}
 	else
 	{
-		Local_u8ErrorState=NOK;
+		Local_ErrorState=NOK;
 	}
 
-	return Local_u8ErrorState;
+	return Local_ErrorState;
 }
 /*
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -174,21 +176,104 @@ uint8_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
  * @retval Local_u8ErrorState
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
-uint8_t GPIO_u8ReadPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t*	PinVal)
+ErrorState_t GPIO_u8ReadPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t*	PinVal)
 {
-	uint8_t Local_u8ErrorState=OK;
+	ErrorState_t Local_ErrorState=OK;
 
-		if((Port<=PORTG) && (PinNum<=PIN15))
+	if((Port<=PORTG) && (PinNum<=PIN15))
+	{
+
+		*PinVal = (((GPIOx[Port]->GPIOx_IDR)>>PinNum)&GET_BIT_VAL);
+
+	}
+	else
+	{
+		Local_ErrorState=NOK;
+	}
+
+	return Local_ErrorState;
+}
+/*
+ *
+ *
+ *
+ *
+ * */
+ErrorState_t GPIO_Write4Bits(Port_t	Port , Pin_t	PinNum , uint8_t Copy_u8Val)
+{
+	ErrorState_t Local_ErrorState=OK;
+
+	if((Port <= PORTG) && (Port >= PORTA)
+			&& (PinNum <= PIN15) && (PinNum >= PIN1))
+	{
+		Copy_u8Val &= 0b00001111;
+		GPIOx[Port]->GPIOx_ODR &=~ ( 0b1111 << PinNum);
+		GPIOx[Port]->GPIOx_ODR |= ( Copy_u8Val << PinNum);
+	}
+	else
+	{
+		Local_ErrorState=NOK;
+	}
+
+	return Local_ErrorState;
+}
+
+ErrorState_t GPIO_Write8Bits(Port_t	Port , Pin_t PinNum , uint8_t Copy_u8Val)
+{
+	ErrorState_t Local_ErrorState=OK;
+
+	if((Port <= PORTG) && (Port >= PORTA)
+			&& (PinNum <= PIN15) && (PinNum >= PIN1))
+	{
+		GPIOx[Port]->GPIOx_ODR &=~ ( 0b11111111 << PinNum);
+		GPIOx[Port]->GPIOx_ODR |= ( Copy_u8Val << PinNum);
+	}
+	else
+	{
+		Local_ErrorState=NOK;
+	}
+
+	return Local_ErrorState;
+}
+
+ErrorState_t GPIO_Write16Bits(Port_t	Port , PortSection_t PortSection , uint16_t Copy_u16Val)
+{
+	ErrorState_t Local_ErrorState=OK;
+
+	if((Port <= PORTG) && (Port >= PORTA))
+	{
+		if(PortSection == LOWER_SECTION)
 		{
-
-			*PinVal = (((GPIOx[Port]->GPIOx_IDR)>>PinNum)&GET_BIT_VAL);
-
+			GPIOx[Port]->GPIOx_ODR &=~  0xFFFF ;
+			GPIOx[Port]->GPIOx_ODR |=  Copy_u16Val ;
 		}
 		else
 		{
-			Local_u8ErrorState=NOK;
+			GPIOx[Port]->GPIOx_ODR &=~ ( 0xFFFF << 8);
+			GPIOx[Port]->GPIOx_ODR |= ( Copy_u16Val << 8);
 		}
+	}
+	else
+	{
+		Local_ErrorState=NOK;
+	}
 
-		return Local_u8ErrorState;
+	return Local_ErrorState;
 }
 
+ErrorState_t GPIO_WritePort(Port_t	Port , uint32_t Copy_u32Val)
+{
+	ErrorState_t Local_ErrorState=OK;
+
+	if((Port <= PORTG) && (Port >= PORTA))
+	{
+		GPIOx[Port]->GPIOx_ODR &=~ ( 0xFFFFFFFF);
+		GPIOx[Port]->GPIOx_ODR |= ( Copy_u32Val );
+	}
+	else
+	{
+		Local_ErrorState=NOK;
+	}
+
+	return Local_ErrorState;
+}

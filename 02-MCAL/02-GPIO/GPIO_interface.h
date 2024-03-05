@@ -1,6 +1,8 @@
 #ifndef   GPIO_INTERFACE_H_
 #define  GPIO_INTERFACE_H_
 
+#include "ErrType.h"
+
 /*@PinVal_t*/
 typedef enum{
 	PIN_LOW=0,
@@ -62,6 +64,12 @@ typedef enum{
 	
 }OutputConf_t;
 
+typedef enum{
+
+	LOWER_SECTION,
+	UPPER_SECTION
+
+}PortSection_t;
 
 
 /*
@@ -127,5 +135,10 @@ uint8_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum );
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 uint8_t GPIO_u8ReadPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t*	PinVal);
+
+ErrorState_t GPIO_Write4Bits(Port_t	Port , Pin_t	PinNum , uint8_t Copy_u8Val);
+ErrorState_t GPIO_Write8Bits(Port_t	Port , Pin_t PinNum , uint8_t Copy_u8Val);
+ErrorState_t GPIO_Write16Bits(Port_t	Port , PortSection_t PortSection , uint16_t Copy_u16Val);
+ErrorState_t GPIO_WritePort(Port_t	Port , uint32_t Copy_u32Val);
 
 #endif

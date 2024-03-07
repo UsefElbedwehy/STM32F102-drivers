@@ -150,7 +150,7 @@ ErrorState_t GPIO_u8SetPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t PinVal)
  */
 ErrorState_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
 {
-	ErrorState_t Local_ErrorState=OK;
+	ErrorState_t Local_ErrorState = OK;
 
 	if((Port<=PORTG) && (PinNum<=PIN15))
 	{
@@ -160,7 +160,7 @@ ErrorState_t GPIO_u8TogglePinValue(Port_t	Port , Pin_t	PinNum )
 	}
 	else
 	{
-		Local_ErrorState=NOK;
+		Local_ErrorState = NOK;
 	}
 
 	return Local_ErrorState;
@@ -188,20 +188,24 @@ ErrorState_t GPIO_u8ReadPinValue(Port_t	Port , Pin_t	PinNum , PinVal_t*	PinVal)
 	}
 	else
 	{
-		Local_ErrorState=NOK;
+		Local_ErrorState = NOK;
 	}
 
 	return Local_ErrorState;
 }
+
 /*
- *
- *
- *
+ *@fn		: GPIO_Write4Bits
+ *@brief	: to set 4 Consecutive bits with the given value
+ *@param	: Port				(ENUM: @Port_t)
+ *@param	: PinNum			(ENUM: @Pin_t)
+ *@param	: Copy_u8Val		(uint8_t)
+ *@retval	: Local_ErrorState 	(ENUM: @ErrorState_t)
  *
  * */
 ErrorState_t GPIO_Write4Bits(Port_t	Port , Pin_t	PinNum , uint8_t Copy_u8Val)
 {
-	ErrorState_t Local_ErrorState=OK;
+	ErrorState_t Local_ErrorState = OK;
 
 	if((Port <= PORTG) && (Port >= PORTA)
 			&& (PinNum <= PIN15) && (PinNum >= PIN1))
@@ -218,6 +222,16 @@ ErrorState_t GPIO_Write4Bits(Port_t	Port , Pin_t	PinNum , uint8_t Copy_u8Val)
 	return Local_ErrorState;
 }
 
+
+/*
+ *@fn		: GPIO_Write8Bits
+ *@brief	: to set 8 Consecutive bits with the given value
+ *@param	: Port				(ENUM: @Port_t)
+ *@param	: PinNum			(ENUM: @Pin_t)
+ *@param	: Copy_u8Val		(uint8_t)
+ *@retval	: Local_ErrorState 	(ENUM: @ErrorState_t)
+ *
+ * */
 ErrorState_t GPIO_Write8Bits(Port_t	Port , Pin_t PinNum , uint8_t Copy_u8Val)
 {
 	ErrorState_t Local_ErrorState=OK;
@@ -236,6 +250,15 @@ ErrorState_t GPIO_Write8Bits(Port_t	Port , Pin_t PinNum , uint8_t Copy_u8Val)
 	return Local_ErrorState;
 }
 
+/*
+ *@fn		: GPIO_Write16Bits
+ *@brief	: to set 16 Consecutive bits with the given value
+ *@param	: Port				(ENUM: @Port_t)
+ *@param	: PortSection		(ENUM: @PortSection_t)
+ *@param	: Copy_u16Val		(uint16_t)
+ *@retval	: Local_ErrorState 	(ENUM: @ErrorState_t)
+ *
+ * */
 ErrorState_t GPIO_Write16Bits(Port_t	Port , PortSection_t PortSection , uint16_t Copy_u16Val)
 {
 	ErrorState_t Local_ErrorState=OK;
@@ -261,6 +284,14 @@ ErrorState_t GPIO_Write16Bits(Port_t	Port , PortSection_t PortSection , uint16_t
 	return Local_ErrorState;
 }
 
+/*
+ *@fn		: GPIO_Write16Bits
+ *@brief	: to set 32 bits (whole the port) with the given value
+ *@param	: Port				(ENUM: @Port_t)
+ *@param	: Copy_u32Val		(uint32_t)
+ *@retval	: Local_ErrorState 	(ENUM: @ErrorState_t)
+ *
+ * */
 ErrorState_t GPIO_WritePort(Port_t	Port , uint32_t Copy_u32Val)
 {
 	ErrorState_t Local_ErrorState=OK;

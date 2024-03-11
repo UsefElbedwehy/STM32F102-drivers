@@ -1,13 +1,17 @@
 #ifndef STM32F103XX_H_
 #define STM32F103XX_H_
 /**************Various Memory Base Addresses***************/
-#define SRAM_BASE_ADDRESS  					0x20000000UL
-#define FLASH_BASE_ADDRESS 					0x08000000UL
+#define SRAM_BASE_ADDRESS  			0x20000000UL
+#define FLASH_BASE_ADDRESS 			0x08000000UL
 #define SYSTEM_MEMORY_BASE_ADDRESS	0x1FFFB000UL
 /**************Core Peripherals Base Addresses***************/
-#define SYSTICK_ADDRESS_BASE					0xE000E010UL
+#define SCB_ADDRESS_BASE			0xE000E008UL				/*SYSTEM CONTROL BLOCK*/
+#define SYSTICK_ADDRESS_BASE		0xE000E010UL				/*SYSTEM TIMER*/
+#define NVIC_ADDRESS_BASE			0xE000E100UL				/*NESTED VECTORED INTTERUPT CONTROLLER*/
 /***************AHB Peripherals Base Addresses****************/
-#define RCC_BASE_ADDRESS 						0x40021000UL    /*RESET AND CLOCK CONTROL BASE ADDRESS*/
+#define RCC_BASE_ADDRESS 			0x40021000UL    			/*RESET AND CLOCK CONTROL BASE ADDRESS*/
+#define DMA2_BASE_ADDRESS 			0x40020400UL    			/*DIRECT MEMORY ACCESS 2 BASE ADDRESS*/
+#define DMA1_BASE_ADDRESS 			0x40020000UL    			/*DIRECT MEMORY ACCESS 1 BASE ADDRESS*/
 /***************APB1 Peripherals Base Addresses****************/
 #define	USART5_BASE_ADDRESS			0x40005000UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 5*/
 #define	USART4_BASE_ADDRESS			0x40004C00UL				/*UNIVERASL SYNCH/ASYNCH RECEIVER TRANSMITTER 4*/
@@ -20,7 +24,7 @@
 #define I2C2_BASE_ADDRESS			0x40005800UL				/*Inter-Integrated Circuit 2*/
 #define I2C1_BASE_ADDRESS			0x40005400UL				/*Inter-Integrated Circuit 1*/
 /***************APB2 Peripherals Base Addresses****************/
-#define GPIOA_BASE_ADDRESS         0x40010800UL				   /*GENERAL PURPOSE INPUT OUTPOT (PORTA) BASE ADDRESS*/
+#define GPIOA_BASE_ADDRESS          0x40010800UL				   /*GENERAL PURPOSE INPUT OUTPOT (PORTA) BASE ADDRESS*/
 #define GPIOB_BASE_ADDRESS			0x40010C00UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTB) BASE ADDRESS*/
 #define GPIOC_BASE_ADDRESS			0x40011000UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTC) BASE ADDRESS*/
 #define GPIOD_BASE_ADDRESS			0x40011400UL               /*GENERAL PURPOSE INPUT OUTPOT (PORTD) BASE ADDRESS*/
@@ -141,5 +145,75 @@ typedef struct{
 #define I2C1	((I2C_Reg_t*)I2C1_BASE_ADDRESS)
 #define I2C2	((I2C_Reg_t*)I2C2_BASE_ADDRESS)
 
+/***************SCB Register Definition Structure****************/
+typedef struct{
+
+	volatile uint32_t SCB_ACTLR			;
+			 uint32_t SCB_Reversed0[829];
+	volatile uint32_t SCB_CPUID         ;
+	volatile uint32_t SCB_ICSR          ;
+	volatile uint32_t SCB_VTOR          ;
+	volatile uint32_t SCB_AIRCR         ;
+	volatile uint32_t SCB_SCR           ;
+	volatile uint32_t SCB_CCR           ;
+	volatile uint32_t SCB_SHPR1[3]      ;
+	volatile uint32_t SCB_SHCRS         ;
+	volatile uint32_t SCB_CFSR          ;
+	volatile uint32_t SCB_MMSR          ;
+	volatile uint32_t SCB_BFSR          ;
+	volatile uint32_t SCB_UFSR          ;
+	volatile uint32_t SCB_HFSR          ;
+			 uint32_t SCB_Reversed1		;
+	volatile uint32_t SCB_MMAR          ;
+	volatile uint32_t SCB_BFAR          ;
+	volatile uint32_t SCB_AFSR          ;
+
+}SCB_RegDef_t;
+/***************SCB Register Definition ****************/
+#define SCB		((SCB_RegDef_t*)SCB_ADDRESS_BASE)
+/***************NVIC Register Definition Structure****************/
+typedef struct{
+
+	volatile uint32_t NVIC_ISER[8];
+			 uint32_t NVIC_REVERSED0[24];
+	volatile uint32_t NVIC_ICER[8];
+			 uint32_t NVIC_REVERSED1[24];
+	volatile uint32_t NVIC_ISPR[8];
+			 uint32_t NVIC_REVERSED2[24];
+	volatile uint32_t NVIC_ICPR[8];
+	 	 	 uint32_t NVIC_REVERSED3[24];
+	volatile uint32_t NVIC_IABR[8];
+ 	 	 	 uint32_t NVIC_REVERSED4[56];
+	volatile uint8_t NVIC_IPR[240];
+	 	 	 uint32_t NVIC_REVERSED5[643];
+	volatile uint32_t NVIC_STIR;
+
+
+}NVIC_RegDef_t;
+/***************NVIC Register Definition ****************/
+#define NVIC		((NVIC_RegDef_t*)NVIC_ADDRESS_BASE)
+/***************NVIC Register Definition Structure****************/
+typedef struct{
+
+		volatile uint32_t DMA_CCR     ;
+		volatile uint32_t DMA_CNDTR   ;
+		volatile uint32_t DMA_CPAR	  ;
+		volatile uint32_t DMA_CMAR    ;
+		         uint32_t DMA_RESERVED;
+
+}DMA_ChannelReg_t;
+
+typedef struct{
+
+	volatile uint32_t DMA_ISR           ;
+	volatile uint32_t DMA_IFCR          ;
+	DMA_ChannelReg_t  DMA_ChannelReg[8] ;
+
+
+
+}DMA_regDef_t;
+/***************NVIC Register Definition ****************/
+#define DMA1		((DMA_regDef_t*)DMA1_BASE_ADDRESS)
+#define DMA2		((DMA_regDef_t*)DMA2_BASE_ADDRESS)
 
 #endif

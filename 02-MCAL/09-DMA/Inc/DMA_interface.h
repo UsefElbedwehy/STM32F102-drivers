@@ -319,25 +319,55 @@ ErrorState_t DMA_Init(const DMA_InitConfig_t* Init);
  * @fn		: DMA_Start
  * @brief	: DMA start transfer
  * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
- * @param	: Copy_pu8Src			pointer to (uint8_t)
- * @param	: Copy_pu8Dst			pointer to (uint8_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
  * @param	: Copy_u32Size			(uint32_t)
  * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t DMA_Start(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uint8_t* Copy_pu8Dst, uint32_t Copy_u32Size);
+ErrorState_t DMA_Start(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size);
 
 /*
  * @fn		: DMA_Start_IT
  * @brief	: DMA start transfer with interrupt notification
  * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
- * @param	: Copy_pu8Src			pointer to (uint8_t)
- * @param	: Copy_pu8Dst			pointer to (uint8_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
  * @param	: Copy_u32Size			(uint32_t)
  * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t DMA_Start_IT(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uint8_t* Copy_pu8Dst, uint32_t Copy_u32Size);
+ErrorState_t DMA_Start_IT(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size);
+
+/*
+ * @fn		: DMA_EnableChannel
+ * @brief	: Enable DMA channel
+ * @param	: Init			const pointer to (STRUCT: @DMA_InitConfig_t)
+ * @retval  : void
+ *
+ * */
+void DMA_EnableChannel(const DMA_InitConfig_t* Init);
+
+/*
+ * @fn		: DMA_DisableChannel
+ * @brief	: Disable DMA channel
+ * @param	: Init			const pointer to (STRUCT: @DMA_InitConfig_t)
+ * @retval  : void
+ *
+ * */
+void DMA_DisableChannel(const DMA_InitConfig_t* Init);
+
+/*
+ * @fn      : DMA_SetSrcDestSize
+ * @brief   : to set the source ,destination and size of data
+ * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
+ * @param	: Copy_u32Size			(uint32_t)
+ * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t DMA_SetSrcDestSize(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size);
 
 /*
  *@fn		: DMA_SetCallBack
@@ -360,10 +390,10 @@ ErrorState_t DMA_SetCallBack(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Num
  *
  * */
 void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number);
+
 /*------------------------------------------------------------------------------------------------------------------------------------
  * ------------------------------------------------------- File Functions ------------------------------------------------------------
  * ----------------------------------------------------------------------------------------------------------------------------------*/
-
 /*
  *@fn		: DMA_InterruptEnable
  *@brief	: to set the interrupts status (enable/disable)
@@ -371,7 +401,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number);
  *@retval	: void
  *
  * */
-static void DMA_InterruptEnable(const DMA_InitConfig_t* Init);
+void DMA_InterruptEnable(const DMA_InitConfig_t* Init);
 
 /*
  *@fn		: DMA_ClearInterruptFlags
@@ -381,7 +411,7 @@ static void DMA_InterruptEnable(const DMA_InitConfig_t* Init);
  *@retval	: void
  *
  * */
-static void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number);
+void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number);
 
 /*
  *@fn		: DMA_ClearInterruptFlags
@@ -392,7 +422,7 @@ static void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Chan
  *@retval	: void
  *
  * */
-static void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number ,DMA_FlagID_t Copy_FlagID);
+void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number ,DMA_FlagID_t Copy_FlagID);
 
 /*
  *@fn		: DMA_ClearInterruptFlags
@@ -403,7 +433,7 @@ static void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Chann
  *@retval	: uint8_t
  *
  * */
-static uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number, DMA_FlagID_t Copy_FlagID);
+uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number, DMA_FlagID_t Copy_FlagID);
 
 /*
  *@fn		: DMA_SetDataTransferDirection
@@ -412,7 +442,7 @@ static uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Cha
  *@retval	: void
  *
  * */
-static void DMA_SetDataTransferDirection(const DMA_InitConfig_t* Init);
+void DMA_SetDataTransferDirection(const DMA_InitConfig_t* Init);
 
 /* ----------------------------------------------------------------------------------------------------------------------------------*/
 /*************************************************************************************************************************************/

@@ -8,6 +8,16 @@
  * @Date	:	11 March 2024
  ***********************************************************************************************************************************
  ***********************************************************************************************************************************
+ * How to use the driver:
+ * 1) #define CONFIGURATION_STRUCT_ADDRESS    &DMA_ConfigStruct
+ *    DMA_Init(CONFIGURATION_STRUCT_ADDRESS)
+ *    DMA_Start(CONFIGURATION_STRUCT_ADDRESS , SrcAddress, DestAddress, Size)
+ *
+ * 2) if you are going to use DMA with interrupt do not forget to set the SCB and NVIC configurations
+ * 		DMA_SetCallBack()
+ * 		DMA_Init(CONFIGURATION_STRUCT_ADDRESS)
+ *    	DMA_Start_IT(CONFIGURATION_STRUCT_ADDRESS , SrcAddress, DestAddress, Size)
+ *
  **********************************************************************************************************************************/
 
 /***********************************************************************************************************************************
@@ -112,36 +122,38 @@ ErrorState_t DMA_Init(const DMA_InitConfig_t* Init)
  * @fn		: DMA_Start
  * @brief	: DMA start transfer
  * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
- * @param	: Copy_pu8Src			pointer to (uint8_t)
- * @param	: Copy_pu8Dst			pointer to (uint8_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
  * @param	: Copy_u32Size			(uint32_t)
  * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t DMA_Start(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uint8_t* Copy_pu8Dst, uint32_t Copy_u32Size)
+ErrorState_t DMA_Start(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size)
 {
 	ErrorState_t Local_ErrorState = DMA_OK;
 
-	if((Copy_pu8Src != NULL) && (Copy_pu8Dst != NULL))
+	if((Init != NULL))
 	{
+		/*DISABLE CHANNEL*/
+		DMA_DisableChannel(Init);
 		/*Configure the source and destination*/
 		switch(Init->DMA_DATA_TRANS_DIR)
 		{
 		case DMA_DIR_M2M:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
 			break;
 		case DMA_DIR_M2P:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
 			break;
 		case DMA_DIR_P2M:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
 			break;
 		case DMA_DIR_P2P:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
 			break;
 		}
 		/*transfer size*/
@@ -162,37 +174,39 @@ ErrorState_t DMA_Start(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uint8_
  * @fn		: DMA_Start_IT
  * @brief	: DMA start transfer with interrupt notification
  * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
- * @param	: Copy_pu8Src			pointer to (uint8_t)
- * @param	: Copy_pu8Dst			pointer to (uint8_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
  * @param	: Copy_u32Size			(uint32_t)
  * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
  *
  * */
-ErrorState_t DMA_Start_IT(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uint8_t* Copy_pu8Dst, uint32_t Copy_u32Size)
+ErrorState_t DMA_Start_IT(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size)
 {
 	ErrorState_t Local_ErrorState = DMA_OK;
 
-	if((Init != NULL) && (Copy_pu8Src != NULL) && (Copy_pu8Dst != NULL))
+	if((Init != NULL))
 	{
-
+		/*DISABLE CHANNEL*/
+		DMA_DisableChannel(Init);
 		/*Configure the source and destination*/
 		switch(Init->DMA_DATA_TRANS_DIR)
 		{
 		case DMA_DIR_M2M:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
 			break;
 		case DMA_DIR_M2P:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+
 			break;
 		case DMA_DIR_P2M:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
 			break;
 		case DMA_DIR_P2P:
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = (uint32_t)Copy_pu8Src;
-			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = (uint32_t)Copy_pu8Dst;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
 			break;
 		}
 
@@ -211,6 +225,78 @@ ErrorState_t DMA_Start_IT(const DMA_InitConfig_t* Init,uint8_t* Copy_pu8Src, uin
 		Local_ErrorState = DMA_NULL_POINTER;
 	}
 
+
+	return Local_ErrorState;
+}
+/*------------------------------------------------------------------------------------------*/
+/*
+ * @fn		: DMA_EnableChannel
+ * @brief	: Enable DMA channel
+ * @param	: Init			const pointer to (STRUCT: @DMA_InitConfig_t)
+ * @retval  : void
+ *
+ * */
+void DMA_EnableChannel(const DMA_InitConfig_t* Init)
+{
+	DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CCR |= (DMA_SET_MASK << DMA_CCRx_EN);
+}
+
+/*
+ * @fn		: DMA_DisableChannel
+ * @brief	: Disable DMA channel
+ * @param	: Init			const pointer to (STRUCT: @DMA_InitConfig_t)
+ * @retval  : void
+ *
+ * */
+void DMA_DisableChannel(const DMA_InitConfig_t* Init)
+{
+	DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CCR &=~ (DMA_SET_MASK << DMA_CCRx_EN);
+}
+
+/*
+ * @fn      : DMA_SetSrcDestSize
+ * @brief   : to set the source ,destination and size of data
+ * @param	: Init			pointer to const (STRUCT: @DMA_InitConfig_t)
+ * @param	: Copy_u32Src			(uint32_t)
+ * @param	: Copy_u32Dst			(uint32_t)
+ * @param	: Copy_u32Size			(uint32_t)
+ * @retval	: Local_ErrorState		(ENUM: @ErrorState_t)
+ *
+ * */
+ErrorState_t DMA_SetSrcDestSize(const DMA_InitConfig_t* Init,uint32_t Copy_u32Src, uint32_t Copy_u32Dst, uint32_t Copy_u32Size)
+{
+	ErrorState_t Local_ErrorState = DMA_OK;
+
+	if((Init != NULL) )
+	{
+		/*Configure the source and destination*/
+		switch(Init->DMA_DATA_TRANS_DIR)
+		{
+		case DMA_DIR_M2M:
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
+			break;
+		case DMA_DIR_M2P:
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Dst;
+			break;
+		case DMA_DIR_P2M:
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
+			break;
+		case DMA_DIR_P2P:
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CPAR = Copy_u32Src;
+			DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CMAR = Copy_u32Dst;
+			break;
+		}
+		/*transfer size*/
+		DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CNDTR = Copy_u32Size;
+
+	}
+	else
+	{
+		Local_ErrorState = DMA_NULL_POINTER;
+	}
 
 	return Local_ErrorState;
 }
@@ -265,7 +351,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 		/*GLOBAL INTERRUPT FLAG*/
 		if(DMA_GetInterruptFlags(DMA_NUM_1 , Channel_Number , DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG) == DMA_READY_FLAG)
 		{
-			DMA_ClearInterruptFlag(DMA_NUM_1, Channel_Number, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
+
 			if( (DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG] != NULL))
 			{
 				DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG]();
@@ -275,7 +361,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 		/*TRANSFER COMPLETE FLAG*/
 		if(DMA_GetInterruptFlags(DMA_NUM_1 , Channel_Number , DMA_CHANNELx_TRANSFER_COMPLETE_FLAG) == DMA_READY_FLAG)
 		{
-			DMA_ClearInterruptFlag(DMA_NUM_1, Channel_Number, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
+
 			if((DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG] != NULL))
 			{
 				DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG]();
@@ -285,7 +371,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 		/*HALF TRANSFER FLAG*/
 		if(DMA_GetInterruptFlags(DMA_NUM_1 , Channel_Number , DMA_CHANNELx_HALF_TRANSFER_FLAG) == DMA_READY_FLAG)
 		{
-			DMA_ClearInterruptFlag(DMA_NUM_1, Channel_Number, DMA_CHANNELx_HALF_TRANSFER_FLAG);
+
 			if((DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_HALF_TRANSFER_FLAG] != NULL))
 			{
 				DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_HALF_TRANSFER_FLAG]();
@@ -295,13 +381,14 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 		/*TRANSFER ERROR FLAG*/
 		if(DMA_GetInterruptFlags(DMA_NUM_1 , Channel_Number , DMA_CHANNELx_TRANSFER_ERROR_FLAG) == DMA_READY_FLAG)
 		{
-			DMA_ClearInterruptFlag(DMA_NUM_1, Channel_Number, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
+
 			if((DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_ERROR_FLAG] != NULL))
 			{
 				DMA1_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_ERROR_FLAG]();
 			}
 
 		}
+		DMA_ClearInterruptFlag(DMA_NUM_1, Channel_Number, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
 	}
 	else if(DMA_Number == DMA_NUM_2)
 	{
@@ -311,7 +398,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*GLOBAL INTERRUPT FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , Channel_Number , DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
+
 				if( (DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG]();
@@ -321,7 +408,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER COMPLETE FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , Channel_Number , DMA_CHANNELx_TRANSFER_COMPLETE_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
 				if((DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG]();
@@ -331,7 +418,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*HALF TRANSFER FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , Channel_Number , DMA_CHANNELx_HALF_TRANSFER_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_HALF_TRANSFER_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_HALF_TRANSFER_FLAG);
 				if((DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_HALF_TRANSFER_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_HALF_TRANSFER_FLAG]();
@@ -341,13 +428,14 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER ERROR FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , Channel_Number , DMA_CHANNELx_TRANSFER_ERROR_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
 				if((DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_ERROR_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[Channel_Number][DMA_CHANNELx_TRANSFER_ERROR_FLAG]();
 				}
 
 			}
+			DMA_ClearInterruptFlag(DMA_NUM_2, Channel_Number, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
 		}
 		else if(Channel_Number == DMA_CHANNEL_4)
 		{
@@ -355,7 +443,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*GLOBAL INTERRUPT FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_4 , DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
 				if( (DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG]();
@@ -365,7 +453,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER COMPLETE FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_4 , DMA_CHANNELx_TRANSFER_COMPLETE_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG]();
@@ -375,7 +463,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*HALF TRANSFER FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_4 , DMA_CHANNELx_HALF_TRANSFER_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_HALF_TRANSFER_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_HALF_TRANSFER_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_HALF_TRANSFER_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_HALF_TRANSFER_FLAG]();
@@ -385,7 +473,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER ERROR FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_4 , DMA_CHANNELx_TRANSFER_ERROR_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_TRANSFER_ERROR_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_4][DMA_CHANNELx_TRANSFER_ERROR_FLAG]();
@@ -396,7 +484,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*GLOBAL INTERRUPT FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_5 , DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG);
 				if( (DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_GLOBAL_INTERRUPT_FLAG]();
@@ -406,7 +494,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER COMPLETE FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_5 , DMA_CHANNELx_TRANSFER_COMPLETE_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_TRANSFER_COMPLETE_FLAG]();
@@ -416,7 +504,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*HALF TRANSFER FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_5 , DMA_CHANNELx_HALF_TRANSFER_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_HALF_TRANSFER_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_HALF_TRANSFER_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_HALF_TRANSFER_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_HALF_TRANSFER_FLAG]();
@@ -426,16 +514,19 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 			/*TRANSFER ERROR FLAG*/
 			if(DMA_GetInterruptFlags(DMA_NUM_2 , DMA_CHANNEL_5 , DMA_CHANNELx_TRANSFER_ERROR_FLAG) == DMA_READY_FLAG)
 			{
-				DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
+				//DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_TRANSFER_ERROR_FLAG);
 				if((DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_TRANSFER_ERROR_FLAG] != NULL))
 				{
 					DMA2_Gpv_CallBack[DMA_CHANNEL_5][DMA_CHANNELx_TRANSFER_ERROR_FLAG]();
 				}
 
 			}
+			DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_4, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
+			DMA_ClearInterruptFlag(DMA_NUM_2, DMA_CHANNEL_5, DMA_CHANNELx_TRANSFER_COMPLETE_FLAG);
 		}
 
 	}
+
 
 }
 /*------------------------------------------------------------------------------------------------------------------------------------
@@ -448,7 +539,7 @@ void DMA_IRQ_Handler(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
  *@retval	: void
  *
  * */
-static void DMA_InterruptEnable(const DMA_InitConfig_t* Init)
+void DMA_InterruptEnable(const DMA_InitConfig_t* Init)
 {
 	/*Transfer complete interrupt enable/disable*/
 	DMAx[Init->DMA_NUMBER]->DMA_ChannelReg[Init->DMA_CHANNEL_NUMBER].DMA_CCR &=~ (DMA_SET_MASK << DMA_CCRx_TCIE);
@@ -470,7 +561,7 @@ static void DMA_InterruptEnable(const DMA_InitConfig_t* Init)
  *@retval	: void
  *
  * */
-static void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
+void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number)
 {
 	/*Channel x global interrupt clear*/
 	DMAx[DMA_Number]->DMA_IFCR |= (DMA_SET_MASK << (DMA_IFCR_CGIF1 + (4 * Channel_Number)) );
@@ -492,7 +583,7 @@ static void DMA_ClearInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Chan
  *@retval	: void
  *
  * */
-static void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number ,DMA_FlagID_t Copy_FlagID)
+void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number ,DMA_FlagID_t Copy_FlagID)
 {
 	switch(Copy_FlagID)
 	{
@@ -512,6 +603,9 @@ static void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Chann
 		/*Transfer error interrupt enable/disable*/
 		DMAx[DMA_Number]->DMA_IFCR |= (DMA_SET_MASK << (DMA_IFCR_CTEIF1 + (4 * Channel_Number)) );
 		break;
+	case DMA_CHANNELx_MAX_FLAG_NUMBER:
+
+		break;
 	}
 
 }
@@ -525,10 +619,10 @@ static void DMA_ClearInterruptFlag(DMA_Number_t  DMA_Number ,DMA_Channel_t Chann
  *@retval	: uint8_t
  *
  * */
-static uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number, DMA_FlagID_t Copy_FlagID)
+uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Channel_Number, DMA_FlagID_t Copy_FlagID)
 {
 	/*Channel x global interrupt clear*/
-	return ((DMAx[DMA_Number]->DMA_IFCR >> (Copy_FlagID + (4 * Channel_Number))) & DMA_GET_MASK);
+	return ((DMAx[DMA_Number]->DMA_ISR >> (Copy_FlagID + (4 * Channel_Number))) & DMA_GET_MASK);
 }
 
 /*
@@ -538,7 +632,7 @@ static uint8_t DMA_GetInterruptFlags(DMA_Number_t  DMA_Number ,DMA_Channel_t Cha
  *@retval	: void
  *
  * */
-static void DMA_SetDataTransferDirection(const DMA_InitConfig_t* Init)
+void DMA_SetDataTransferDirection(const DMA_InitConfig_t* Init)
 {
 	switch(Init->DMA_DATA_TRANS_DIR)
 	{

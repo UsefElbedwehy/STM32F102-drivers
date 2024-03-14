@@ -39,37 +39,6 @@ static uint16_t* Global_u16ReceiveData[NUMBER_OF_USART_PERIPH] = {NULL};
  ********************************************************************************/
 
 /*
- * @fn:		USART_ReadIntFlag
- * @brief:
- * @param:	Copy_USARTNumber		(ENUM: @USART_PrephNumber)
- * @param:	Copy_ITFlagID			(ENUM: @USART_FlagID_t)
- * @param:	Copy_u8ITFlagValue		uint8_t pointer to save the flag value
- * @retval:	Local_ErrorState		(ENUM: @ErrorState_t)
- *			USART status
- * */
-ErrorState_t USART_ReadIntFlag(USART_PrephNumber Copy_USARTNumber ,USART_FlagID_t Copy_ITFlagID ,uint8_t* Copy_u8ITFlagValue)
-{
-
-	ErrorState_t Local_ErrorState = OK;
-
-	if(Copy_u8ITFlagValue == NULL)
-	{
-		Local_ErrorState = NULL_POINTER;
-		return Local_ErrorState;
-	}
-	else
-	{
-		/*GET BIT VALUE*/
-		*Copy_u8ITFlagValue = ( ( (USARTx[Copy_USARTNumber]->USART_SR) >> Copy_ITFlagID ) & READ_VAL_MASK );
-
-	}
-
-	return Local_ErrorState;
-}
-
-/*INITIALIZATION*/
-
-/*
  * @fn:		USART_Init
  * @brief:
  * @param:	Copy_InitConfig		  pointer to (STRUCT: @USART_ConfigReg_t)
@@ -108,16 +77,14 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 			&& ( Copy_InitConfig->USART_SYNCHMODE <= CLOCK_ENABLE )
 			&& ( Copy_InitConfig->USART_SYNCHMODE >= CLOCK_DISABLE ) )
 	{
-		/*USART enable */
-		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1 |= (SET_MASK << CR1_UE);
+
 		/*Make sure the register is at reset value*/
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1  &=~  CR1_REG_MASK;
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR2  &=~  CR2_REG_MASK;
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR3  &=~  CR3_REG_MASK;
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_GTPR &=~  GTP_REG_MASK;
 
-		/*USART enable */
-		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1 |= (SET_MASK << CR1_UE);
+
 
 		/*word length*/
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1 |= ((Copy_InitConfig->USART_WORDLENGTH) << CR1_M);
@@ -171,6 +138,8 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 			/*RTS ENABLE*/
 			USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR3 |= (SET_MASK << CR3_RTSE);
 		}
+		/*USART enable */
+		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR1 |= (SET_MASK << CR1_UE);
 
 	}
 	else
@@ -181,9 +150,6 @@ ErrorState_t USART_Init(const USART_ConfigReg_t* Copy_InitConfig)
 	return Local_ErrorState;
 
 }
-
-
-
 
 /*WAITING*/
 
@@ -230,6 +196,27 @@ ErrorState_t USART_TransmitData(const USART_ConfigReg_t* Copy_InitConfig ,uint8_
 
 	return Local_ErrorState;
 }
+
+/*
+ * @fn		: USART_TransmitString
+ * @brief   : Usart transmit string
+ * @param	: Copy_InitConfig		  pointer to (STRUCT: @USART_ConfigReg_t)
+ * @param	: Copy_Data				  pointer to (char)
+ * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
+ *			USART status
+ *
+ * */
+void USART_TransmitString(const USART_ConfigReg_t* Copy_InitConfig ,char* Copy_Data)
+{
+	uint8_t Local_counter = 0;
+	while(Copy_Data[Local_counter] != '\0')
+	{
+		USART_TransmitData(Copy_InitConfig , Copy_Data[Local_counter]);
+		Local_counter++;
+	}
+
+}
+
 /*
  * @fn:		USART_ReceiveData
  * @brief:
@@ -281,6 +268,7 @@ ErrorState_t USART_TransmitDataEnable_DMA(const USART_ConfigReg_t* Copy_InitConf
 
 	if(Copy_InitConfig != NULL)
 	{
+		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_SR &=~ (1<< SR_TC);
 		/*Enable DMA transmitter*/
 		USARTx[Copy_InitConfig->USART_USARTNUMBER]->USART_CR3 |= (SET_MASK << CR3_DMAT);
 	}
@@ -317,68 +305,6 @@ ErrorState_t USART_ReceiveDataEnable_DMA(const USART_ConfigReg_t* Copy_InitConfi
 }
 
 /****** ### INTERRUPT ### ******/
-
-/*
- * @fn:		USART_SetCallBack
- * @brief: set the callback function
- * @param:	USART_NUM		    (ENUM: @USART_PrephNumber)
- * @param:	FLAG_ID		  		(ENUM: @USART_FlagID_t)
- * @param:	Copy_pvCallBack		  pointer to void function
- * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
- *			USART status
- * */
-ErrorState_t USART_SetCallBack( USART_PrephNumber USART_NUM ,USART_FlagID_t FLAG_ID,void (*Copy_pvCallBack)(void))
-{
-	ErrorState_t Local_ErrorState = OK;
-
-	if(Copy_pvCallBack != NULL)
-	{
-		/*Set the callback function*/
-		G_pvCallBackFunc[USART_NUM][FLAG_ID] = Copy_pvCallBack;
-	}
-	else
-	{
-		Local_ErrorState = NULL_POINTER;
-	}
-
-	return Local_ErrorState;
-}
-/*
- * @fn:		USART_IRQ_Handler
- * @brief: Handle the IRQ interrupt
- * @param:	USART_NUM		    (ENUM: @USART_PrephNumber)
- * @retval:	void
- * */
-void USART_IRQ_Handler( USART_PrephNumber USART_NUM)
-{
-	uint8_t FlagVal=0;
-	/*check if Received data is ready to be read flag is set*/
-	USART_ReadIntFlag(USART_NUM, READ_DATA_REG_NOT_EMPTY_FLAG_ID, &FlagVal);
-	if(FlagVal == READY_FLAG)
-	{
-		/*read the received data*/
-		*Global_u16ReceiveData[USART_NUM] = USARTx[USART_NUM]->USART_DR;
-
-		if(G_pvCallBackFunc[USART_NUM][READ_DATA_REG_NOT_EMPTY_FLAG_ID] != NULL)
-		{
-			G_pvCallBackFunc[USART_NUM][READ_DATA_REG_NOT_EMPTY_FLAG_ID]();
-		}
-	}
-
-	/*check if Transmission complete flag is set*/
-	FlagVal=0;
-	USART_ReadIntFlag(USART_NUM, TRANSMISSION_COMPLETE_FLAG_ID, &FlagVal);
-	if(FlagVal == READY_FLAG)
-	{
-		/*Clear transmit complete flag*/
-		USARTx[USART_NUM]->USART_SR &=~ (SET_MASK << SR_TC);
-		if(G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID] != NULL)
-		{
-			G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID]();
-		}
-	}
-
-}
 
 /*
  * @fn:		USART_Transmit_IT
@@ -439,6 +365,99 @@ ErrorState_t USART_Receive_IT(const USART_ConfigReg_t* Copy_InitConfig , uint16_
 	return Local_ErrorState;
 }
 
+/*
+ * @fn:		USART_SetCallBack
+ * @brief: set the callback function
+ * @param:	USART_NUM		    (ENUM: @USART_PrephNumber)
+ * @param:	FLAG_ID		  		(ENUM: @USART_FlagID_t)
+ * @param:	Copy_pvCallBack		  pointer to void function
+ * @retval:	Local_ErrorState				 (ENUM: @ErrorState_t)
+ *			USART status
+ * */
+ErrorState_t USART_SetCallBack( USART_PrephNumber USART_NUM ,USART_FlagID_t FLAG_ID,void (*Copy_pvCallBack)(void))
+{
+	ErrorState_t Local_ErrorState = OK;
+
+	if(Copy_pvCallBack != NULL)
+	{
+		/*Set the callback function*/
+		G_pvCallBackFunc[USART_NUM][FLAG_ID] = Copy_pvCallBack;
+	}
+	else
+	{
+		Local_ErrorState = NULL_POINTER;
+	}
+
+	return Local_ErrorState;
+}
+
+/*
+ * @fn:		USART_IRQ_Handler
+ * @brief: Handle the IRQ interrupt
+ * @param:	USART_NUM		    (ENUM: @USART_PrephNumber)
+ * @retval:	void
+ * */
+void USART_IRQ_Handler( USART_PrephNumber USART_NUM)
+{
+	uint8_t FlagVal=0;
+	/*check if Received data is ready to be read flag is set*/
+	USART_ReadIntFlag(USART_NUM, READ_DATA_REG_NOT_EMPTY_FLAG_ID, &FlagVal);
+	if(FlagVal == READY_FLAG)
+	{
+		/*read the received data*/
+		*Global_u16ReceiveData[USART_NUM] = USARTx[USART_NUM]->USART_DR;
+
+		if(G_pvCallBackFunc[USART_NUM][READ_DATA_REG_NOT_EMPTY_FLAG_ID] != NULL)
+		{
+			G_pvCallBackFunc[USART_NUM][READ_DATA_REG_NOT_EMPTY_FLAG_ID]();
+		}
+	}
+
+	/*check if Transmission complete flag is set*/
+	FlagVal=0;
+	USART_ReadIntFlag(USART_NUM, TRANSMISSION_COMPLETE_FLAG_ID, &FlagVal);
+	if(FlagVal == READY_FLAG)
+	{
+		/*Clear transmit complete flag*/
+		USARTx[USART_NUM]->USART_SR &=~ (SET_MASK << SR_TC);
+		if(G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID] != NULL)
+		{
+			G_pvCallBackFunc[USART_NUM][TRANSMISSION_COMPLETE_FLAG_ID]();
+		}
+	}
+
+}
+
+
+
+/*
+ * @fn:		USART_ReadIntFlag
+ * @brief:
+ * @param:	Copy_USARTNumber		(ENUM: @USART_PrephNumber)
+ * @param:	Copy_ITFlagID			(ENUM: @USART_FlagID_t)
+ * @param:	Copy_u8ITFlagValue		uint8_t pointer to save the flag value
+ * @retval:	Local_ErrorState		(ENUM: @ErrorState_t)
+ *			USART status
+ * */
+ErrorState_t USART_ReadIntFlag(USART_PrephNumber Copy_USARTNumber ,USART_FlagID_t Copy_ITFlagID ,uint8_t* Copy_u8ITFlagValue)
+{
+
+	ErrorState_t Local_ErrorState = OK;
+
+	if(Copy_u8ITFlagValue == NULL)
+	{
+		Local_ErrorState = NULL_POINTER;
+		return Local_ErrorState;
+	}
+	else
+	{
+		/*GET BIT VALUE*/
+		*Copy_u8ITFlagValue = ( ( (USARTx[Copy_USARTNumber]->USART_SR) >> Copy_ITFlagID ) & READ_VAL_MASK );
+
+	}
+
+	return Local_ErrorState;
+}
 /********************************************************************************/
 
 
